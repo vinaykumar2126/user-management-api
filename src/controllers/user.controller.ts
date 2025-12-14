@@ -1,19 +1,14 @@
 import { Request, Response } from "express";
 import { userService } from "../services/user.service";
 
-export const registerUser = async (req: Request, res: Response) => {
-  const { name, email, password } = req.body;
-
-  try {
-    const user = await userService.register(name, email, password);
-    res.status(201).json(user);
-  } catch (err: any) {
-    res.status(400).json({ message: err.message });
-  }
-};
-
 export const getUsers = async (req: Request, res: Response) => {
-  res.json(await userService.getUsers());
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const search = (req.query.string as string) || "";
+
+  const data = await userService.getUsers(page,limit,search);
+
+  res.json(data);
 };
 
 export const getUser = async (req: Request, res: Response) => {

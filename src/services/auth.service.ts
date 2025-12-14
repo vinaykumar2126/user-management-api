@@ -1,9 +1,24 @@
 import {Request,Response} from 'express';
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from '../models/User';
+import User,{IUser} from '../models/User';
 
 export const authService={ 
+    register: async (name: string, email: string, password: string,role: string): Promise<IUser> => {
+        const existing = await User.findOne({ email });
+        if (existing) throw new Error("User already exists");
+    
+        const hashed = await bcrypt.hash(password, 10);
+    
+        const user = await User.create({
+          name,
+          email,
+          password: hashed,
+          role
+        });
+    
+        return user;
+    },
     login: async(email:string,password:string)=>{
         const user = await User.findOne({ email });
         if(!user){
@@ -21,4 +36,5 @@ export const authService={
         return {token,user};
     }
 };
+
 

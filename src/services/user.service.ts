@@ -2,23 +2,17 @@ import User, { IUser } from "../models/User";
 import bcrypt from "bcryptjs";
 
 export const userService = {
-  register: async (name: string, email: string, password: string): Promise<IUser> => {
-    const existing = await User.findOne({ email });
-    if (existing) throw new Error("User already exists");
-
-    const hashed = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      name,
-      email,
-      password: hashed
-    });
-
-    return user;
-  },
-
-  getUsers: async () => {
-    return User.find().select("-password");
+  getUsers: async (page=1,limit=10,search="" ) => {
+    const query = search
+    ?{
+      $or:[
+        {name:{$regex:search,$options:"i"}},
+        {email:{$regex:search,$options:"i"}}
+      ]
+    }
+    :{};
+    const skip = (page-1)*limit;
+    return User.find(query).skip(skip).limit(limit).select("-password");
   },
 
   getUser: async (id: string) => {
